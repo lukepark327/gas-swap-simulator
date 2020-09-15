@@ -7,7 +7,7 @@ class Uniswap:  # between Eth and Gas
                  address,
                  amount_Gwei,   # ex) (1.) * n
                  amount_GAS,    # ex) (200. ~= 199.5) * n
-                 init_LT=1000000,
+                 init_LT,
                  fee=0.003      # 0.3%
                  ):
 
@@ -58,36 +58,36 @@ class Uniswap:  # between Eth and Gas
     def Gwei_to_GAS(self, delta_Gwei, bool_fee=True, bool_update=True):
         Gwei_prime = self.Gwei + delta_Gwei
         delta_GAS = self._get_input_price(delta_Gwei, self.Gwei, self.GAS, bool_fee=bool_fee)
-        GAS_prime = self.GAS - delta_GAS
 
         if bool_update:
+            GAS_prime = self.GAS - delta_GAS
             self._update(Gwei_prime, GAS_prime)  # Pool update
         return delta_GAS
 
     def Gwei_to_GAS_exact(self, delta_GAS, bool_fee=True, bool_update=True):
         delta_Gwei = self._get_output_price(delta_GAS, self.GAS, self.Gwei, bool_fee=bool_fee)
         Gwei_prime = self.Gwei + delta_Gwei
-        GAS_prime = self.GAS - delta_GAS
 
         if bool_update:
+            GAS_prime = self.GAS - delta_GAS
             self._update(Gwei_prime, GAS_prime)  # Pool update
         return delta_Gwei
 
     def GAS_to_Gwei(self, delta_GAS, bool_fee=True, bool_update=True):
         GAS_prime = self.GAS + delta_GAS
         delta_Gwei = self._get_input_price(delta_GAS, self.GAS, self.Gwei, bool_fee=bool_fee)
-        Gwei_prime = self.Gwei - delta_Gwei
 
         if bool_update:
+            Gwei_prime = self.Gwei - delta_Gwei
             self._update(Gwei_prime, GAS_prime)  # Pool update
         return delta_Gwei
 
     def GAS_to_Gwei_exact(self, delta_Gwei, bool_fee=True, bool_update=True):
         delta_GAS = self._get_output_price(delta_Gwei, self.Gwei, self.GAS, bool_fee=bool_fee)
         GAS_prime = self.GAS + delta_GAS
-        Gwei_prime = self.Gwei - delta_Gwei
 
         if bool_update:
+            Gwei_prime = self.Gwei - delta_Gwei
             self._update(Gwei_prime, GAS_prime)  # Pool update
         return delta_GAS
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     import random
 
     """init"""
-    us = Uniswap('-1', 100000, 20000000)  # 1:200
+    us = Uniswap('-1', 100000, 20000000, 1000000)  # 1:200
     us.print_pool_state(bool_LT=True)
 
     """Providing Liquidity"""
