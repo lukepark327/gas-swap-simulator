@@ -107,22 +107,22 @@ if __name__ == "__main__":
 
     """init"""
     us = Uniswap('-1', 100000, 20000000, 1000000)  # 1:200
-    # us.print_pool_state(bool_LT=True)
+    us.print_pool_state(bool_LT=True)
 
     """Providing Liquidity"""
     us.join('0', 2000, 400001)
-    # us.print_pool_state(bool_LT=True)
+    us.print_pool_state(bool_LT=True)
 
     """Txs"""
     for _ in range(1000):
         if random.random() < 0.5:
-            us.Gwei_to_GAS(20000)
+            us.Gwei_to_GAS(1000)
         else:
-            us.GAS_to_Gwei_exact(20000)
+            us.GAS_to_Gwei_exact(1000)
 
         # print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei), '\t', arbitrager.balance_GAS)
         arbitrager.arbitrage(us)
-        print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei), '\t', arbitrager.balance_GAS)
+        # print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei), '\t', arbitrager.balance_GAS)
         # print()
         balances.append(arbitrager.balance_GAS)
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     """Removing Liquidity"""
     us.out('0', 20000)  # The LT holder takes extra fees
-    # us.print_pool_state(bool_LT=True)
+    us.print_pool_state(bool_LT=True)
 
     """Plot"""
     plt.plot(balances)
