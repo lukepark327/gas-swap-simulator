@@ -65,8 +65,8 @@ class Arbitrager:
         if gain <= 0:
             pass
         else:
-            pool.GAS_to_Gwei(N_GAS, bool_update=True)
             self.update_balance_GAS(gain)
+            pool.GAS_to_Gwei(N_GAS, bool_update=True)
 
     def _buy_GAS(self, pool):
         # Calculating the best N_Gwei which maximize `gain`
@@ -79,8 +79,8 @@ class Arbitrager:
         if gain <= 0:
             pass
         else:
-            pool.Gwei_to_GAS(N_Gwei, bool_update=True)
             self.update_balance_GAS(gain)
+            pool.Gwei_to_GAS(N_Gwei, bool_update=True)
 
     def arbitrage(self, pool):
         current_Gwei, current_GAS = pool.Gwei, pool.GAS
