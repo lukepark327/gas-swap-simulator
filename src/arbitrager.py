@@ -1,4 +1,4 @@
-from math import floor
+from math import floor, sqrt
 
 
 class Arbitrager:
@@ -48,35 +48,49 @@ class Arbitrager:
     # def _sell_GAS(self, pool):
     #     pass
 
+    def _best_number(self, X, Y, fee, unit):
+        gamma = (1. - fee)
+        N = floor(  # TODO: floor or ceil
+            (sqrt(Y) * sqrt(gamma) * sqrt(X) / sqrt(unit) - X) / (gamma))
+        return N
+
     def _buy_Gwei(self, pool):
-        pass
+        # Calculating the best N_GAS which maximize `gain`
+        N_GAS = self._best_number(pool.GAS, pool.Gwei, pool.fee, (1. / self.oracle_ratio))
+
+        # Buy Gwei
+        delta_Gwei = pool.GAS_to_Gwei(N_GAS, bool_update=False)
+        gain = delta_Gwei * self.oracle_ratio - N_GAS - self.tx_fee["GAS2Gwei"]  # profit - loss - fee
+
+        if gain <= 0:
+            pass
+        else:
+            pool.GAS_to_Gwei(N_GAS, bool_update=True)
+            self.update_balance_GAS(gain)
 
     def _buy_GAS(self, pool):
-
-        # TODO: cal. N
-        N = 4000000  # > 85896
-        N_Eth = N / self.oracle_ratio
-
-        # Maximize gain
-        delta_GAS = pool.Gwei_to_GAS(N_Eth, bool_update=False)
-        gain = delta_GAS - N - self.tx_fee["Gwei2GAS"]
-        print(">>> gain:", gain)
+        # Calculating the best N_Gwei which maximize `gain`
+        N_Gwei = self._best_number(pool.Gwei, pool.GAS, pool.fee, self.oracle_ratio)
 
         # Buy GAS
-        pool.Gwei_to_GAS(N_Eth, bool_update=True)
-        self.update_balance_GAS(gain)
+        delta_GAS = pool.Gwei_to_GAS(N_Gwei, bool_update=False)
+        gain = delta_GAS - N_Gwei * self.oracle_ratio - self.tx_fee["Gwei2GAS"]  # profit - loss - fee
+
+        if gain <= 0:
+            pass
+        else:
+            pool.Gwei_to_GAS(N_Gwei, bool_update=True)
+            self.update_balance_GAS(gain)
 
     def arbitrage(self, pool):
         current_Gwei, current_GAS = pool.Gwei, pool.GAS
         pool_ratio = float(current_GAS / current_Gwei)
 
         if pool_ratio > self.oracle_ratio:
-            print("buy GAS")
             # self._sell_Gwei(pool)
             self._buy_GAS(pool)
 
         elif pool_ratio < self.oracle_ratio:
-            print("buy Gwei")
             # self._sell_GAS(pool)
             self._buy_Gwei(pool)
 
@@ -85,9 +99,11 @@ if __name__ == "__main__":
     from uniswap import Uniswap
 
     import random
+    import matplotlib.pyplot as plt
 
     # Arbitrager
     arbitrager = Arbitrager(1000000000, 200)
+    balances = []
 
     """init"""
     us = Uniswap('-1', 100000, 20000000, 1000000)  # 1:200
@@ -98,19 +114,24 @@ if __name__ == "__main__":
     # us.print_pool_state(bool_LT=True)
 
     """Txs"""
-    for _ in range(1):
-        # TODO: N users
-        if random.random() < 0.0:
+    for _ in range(1000):
+        if random.random() < 0.5:
             us.Gwei_to_GAS(20000)
         else:
             us.GAS_to_Gwei_exact(20000)
 
-        print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei))
+        # print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei), '\t', arbitrager.balance_GAS)
         arbitrager.arbitrage(us)
-        print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei))
+        print(us.Gwei, '\t', us.GAS, '\t', float(us.GAS / us.Gwei), '\t', arbitrager.balance_GAS)
+        # print()
+        balances.append(arbitrager.balance_GAS)
 
     # us.print_pool_state(bool_LT=False)
 
     """Removing Liquidity"""
     us.out('0', 20000)  # The LT holder takes extra fees
     # us.print_pool_state(bool_LT=True)
+
+    """Plot"""
+    plt.plot(balances)
+    plt.show()
