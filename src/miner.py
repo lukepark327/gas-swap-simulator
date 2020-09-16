@@ -28,7 +28,7 @@ class Miner():
         self.gas_limit_bound = 1024  # params/protocol_params.go @ Geth
         self.block_reward_Gwei = int(2e+9)  # Gwei  # consensus/ethash/consensus.go @ Geth
 
-    def update(self, gas_upside=True):
+    def block_update(self, gas_upside=True):
         self.block_number += 1
         self._update_gas_limit(upside=gas_upside)
 
@@ -100,7 +100,7 @@ class Miner():
         self.balance_Gwei += self.block_reward_Gwei
         self.balance_GAS += block_reward_GAS
 
-        return block_reward_GAS
+        return self.block_reward_Gwei, block_reward_GAS
 
     """Balance"""
 
@@ -123,7 +123,7 @@ class Miner():
     """Logging"""
 
     def print_block_state(self):
-        print("number\t\tgas_limit")
+        print("block_number\tgas_limit")
         print("{}\t\t{}".format(self.block_number, self.block_gas_limit))
         print('\n')
 
@@ -141,32 +141,32 @@ if __name__ == "__main__":
     miner = Miner(current_block_number,
                   current_block_gas_limit)
 
-    """test mining"""
-    txs = [  # (tx_id, fee)
-        (0, 21000),
-        (1, 100000),
-        (2, 52000),
-        (3, 76000),
-        (4, 21000),
-        (5, 110000),
-        (6, 58000),
-        (7, 73000),
-        (8, 23000),
-        (9, 70000),
-        (10, 72000),
-        (11, 126000),
-        (12, 21000),
-        (13, 21000),
-        (14, 52000),
-        (15, 21000)]
+    # """test mining"""
+    # txs = [  # (tx_id, fee)
+    #     (0, 21000),
+    #     (1, 100000),
+    #     (2, 52000),
+    #     (3, 76000),
+    #     (4, 21000),
+    #     (5, 110000),
+    #     (6, 58000),
+    #     (7, 73000),
+    #     (8, 23000),
+    #     (9, 70000),
+    #     (10, 72000),
+    #     (11, 126000),
+    #     (12, 21000),
+    #     (13, 21000),
+    #     (14, 52000),
+    #     (15, 21000)]
 
-    print(miner.mine(txs))
+    # print(miner.mine(txs))
 
     """test block update"""
     miner.print_block_state()
 
     for _ in range(10):
-        miner.update()
+        miner.block_update()
     miner.print_block_state()
 
     """test rewarding system"""
@@ -174,11 +174,11 @@ if __name__ == "__main__":
 
     # case 1: pool
     from uniswap import Uniswap
-    us = Uniswap('-1', 100000, 20000000)  # 1:200
+    us = Uniswap('-1', 100000, 20000000, 1000000)  # 1:200
     print(miner.reward(pool=us))
     miner.print_balance_state()
 
     # case 2: oracle
     miner.reward_mode = "oracle"
-    print(miner.reward(oracle_ratio=200.))
+    print(miner.reward(oracle_ratio=200))
     miner.print_balance_state()

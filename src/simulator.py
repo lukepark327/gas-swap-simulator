@@ -28,10 +28,7 @@ def argparsing():
 if __name__ == "__main__":
     args = argparsing()
     # print(args)
-
-    """Extrs data"""
-    burn_address = '-1'
-
+    
     # patience = {'high': 100, 'middle': 50, 'low': 10}  # blocks
 
     users = []
