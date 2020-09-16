@@ -99,14 +99,14 @@ class Uniswap:  # between Eth and Gas
         GAS_prime = floor((1. + alpha) * self.GAS) + 1
         return GAS_prime - self.GAS
 
-    def join(self, address, delta_Gwei, delta_GAS):
+    def join(self, address, delta_Gwei, delta_GAS, bool_update=True):
         # delta_GAS validity check
         current_required_GAS_for_liquidity = self.required_GAS_for_liquidity(delta_Gwei)
         if current_required_GAS_for_liquidity != delta_GAS:
             raise Exception("invalid delta_GAS. Require {} GAS but input is {}".format(
                 current_required_GAS_for_liquidity, delta_GAS))
 
-        delta_LT = self._mint(delta_Gwei, delta_GAS)
+        delta_LT = self._mint(delta_Gwei, delta_GAS, bool_update=bool_update)
         if address in self.LT_holders.keys():
             self.LT_holders[address] += delta_LT
         else:
@@ -114,7 +114,7 @@ class Uniswap:  # between Eth and Gas
 
         return delta_LT
 
-    def out(self, address, delta_LT):
+    def out(self, address, delta_LT, bool_update=True):
         # Ownership validity check
         if address not in self.LT_holders.keys():
             raise Exception("invalid address")
@@ -124,14 +124,14 @@ class Uniswap:  # between Eth and Gas
             raise Exception("invalid delta_LT. Have to be under {} LT but input is {}".format(
                 self.LT_holders[address], delta_LT))
 
-        delta_Gwei, delta_GAS = self._burn(delta_LT)
+        delta_Gwei, delta_GAS = self._burn(delta_LT, bool_update=bool_update)
         self.LT_holders[address] -= delta_LT
         if self.LT_holders[address] == 0:
             del self.LT_holders[address]
 
         return delta_Gwei, delta_GAS
 
-    def _mint(self, delta_Gwei, delta_GAS):  # add_liquidity
+    def _mint(self, delta_Gwei, delta_GAS, bool_update=True):  # add_liquidity
         alpha = float(delta_Gwei / self.Gwei)
 
         Gwei_prime = self.Gwei + delta_Gwei
@@ -139,10 +139,11 @@ class Uniswap:  # between Eth and Gas
         LT_prime = floor((1. + alpha) * self.LT)
         delta_LT = LT_prime - self.LT
 
-        self._update(Gwei_prime, GAS_prime, LT_prime)  # Pool update
+        if bool_update:
+            self._update(Gwei_prime, GAS_prime, LT_prime)  # Pool update
         return delta_LT
 
-    def _burn(self, delta_LT):  # remove_liquidity
+    def _burn(self, delta_LT, bool_update=True):  # remove_liquidity
         alpha = float(delta_LT / self.LT)
 
         Gwei_prime = ceil((1. - alpha) * self.Gwei)
@@ -151,7 +152,8 @@ class Uniswap:  # between Eth and Gas
         delta_Gwei = self.Gwei - Gwei_prime
         delta_GAS = self.GAS - GAS_prime
 
-        self._update(Gwei_prime, GAS_prime, LT_prime)  # burn LT
+        if bool_update:
+            self._update(Gwei_prime, GAS_prime, LT_prime)  # burn LT
         return delta_Gwei, delta_GAS
 
     """Logging"""
