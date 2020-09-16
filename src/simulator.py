@@ -1,6 +1,12 @@
 import argparse
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+
+# from uniswap import Uniswap
+from circuitbreaker import Uniswap_with_CB
+from arbitrager import Arbitrager
+from miner import Miner
 
 
 def argparsing():
@@ -16,8 +22,10 @@ def argparsing():
     parser.add_argument('--nRounds', type=int, default=10000)
     parser.add_argument('--gas', type=str, default='original',
                         choices=('original', 'uniswap'))
-    parser.add_argument('--miner', type=str, default='fee',
+    parser.add_argument('--mining', type=str, default='fee',
                         choices=('fee', 'knapsack'))
+    parser.add_argument('--reward', type=str, default='pool',
+                        choices=('pool', 'oracle'))
     parser.add_argument('--CB', type=str, default='nothing',
                         choices=('swap', 'pause', 'nothing'))
 
@@ -35,12 +43,48 @@ if __name__ == "__main__":
     random.seed(args.seed)
 
     """Hyperparams"""
+    current_block_number = 0
+    current_block_gas_limit = 12000000
 
-    """Set users"""
-    users = []
+    """Set Users & Transaction Pool"""
+    users = []  # index: id
     for i in range(args.nUsers):
-        user = {
-            'address': str(i),
-            'nonce': 0}
+        users.append(0)  # initial nonce value
 
-    print(users)
+    tx_pool = []
+    # tx = {'owner': owner, 'block': block, 'fee': fee}
+
+    """Set Miner"""
+    miner = Miner(current_block_number,
+                  current_block_gas_limit,
+                  mining_mode=args.mining,
+                  reward_mode=args.reward)
+
+    """Set Swap Pool"""
+    us = Uniswap_with_CB(address='-1',
+                         amount_Gwei=1000000,
+                         amount_GAS=200000000,  # Gwei:GAS = 1:200
+                         init_LT=1000000,
+                         fee=0.003,
+                         CB_mode=args.CB,       # if "nothing", it works like normal Uniswap protocol.
+                         threshold=0.05)
+
+    print(">>> initial pool state")
+    us.print_pool_state(bool_LT=True)
+
+    """Simulation
+    # Time unit         : block
+    # Transaction type  : payment (21000 gas)
+    # Gas
+    # TBA
+    """
+    for current_block in range(args.nRounds):
+        pass
+
+        if args.gas == "original":
+            pass
+
+        elif args.gas == "uniswap":
+            pass
+
+        # latest_block
