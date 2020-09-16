@@ -180,5 +180,5 @@ if __name__ == "__main__":
 
     # case 2: oracle
     miner.reward_mode = "oracle"
-    print(miner.reward(oracle_ratio=200))
+    print(miner.reward(oracle_ratio=200.))
     miner.print_balance_state()
