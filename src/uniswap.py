@@ -168,6 +168,8 @@ class Uniswap:  # between Eth and Gas
 if __name__ == "__main__":
     import random
 
+    random.seed(12345)
+
     """init"""
     us = Uniswap('-1', 100000, 20000000, 1000000)  # 1:200
     us.print_pool_state(bool_LT=True)

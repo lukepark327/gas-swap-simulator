@@ -8,6 +8,8 @@ from uniswap import Uniswap
 # Protocol
 # Run at critical moment(s)
 """
+
+
 class Uniswap_with_CB(Uniswap):
     def __init__(self,
                  address,
@@ -83,18 +85,21 @@ class Uniswap_with_CB(Uniswap):
             # print("pool_ratio is too high")
             self.high += 1
             self._cb(oracle_ratio, pool_ratio)
+            return 1  # high
         elif (pool_ratio * (1. + self.threshold) <= oracle_ratio):
             # print("pool_ratio is too low")
             self.low += 1
             self._cb(oracle_ratio, pool_ratio)
+            return -1  # low
         else:
             # print("no problem")
             self.normal += 1
-            pass
+            return 0  # same
 
 
 if __name__ == "__main__":
     import random
+    import matplotlib.pyplot as plt
 
     random.seed(12345)
     # random.seed(950327)
@@ -110,15 +115,52 @@ if __name__ == "__main__":
     us.circuit_break(oracle_ratio=200.)
 
     """Txs"""
-    for _ in range(100000):
+    nRounds = 100000
+
+    highs, lows = [], []
+    Gweis, GASs = [], []
+
+    for i in range(nRounds):
         if random.random() < 0.5:
             us.Gwei_to_GAS(10)
         else:
             us.GAS_to_Gwei_exact(10)
-        us.circuit_break(oracle_ratio=200.)
+
+        cb = us.circuit_break(oracle_ratio=200.)
+
+        """log"""
+        if cb == 1:
+            highs.append(i)
+        elif cb == -1:
+            lows.append(i)
+
+        Gweis.append(us.Gwei)
+        GASs.append(us.GAS)
+
     us.print_pool_state(bool_LT=False)
     print(us.low, us.high, us.normal)
 
     """Removing Liquidity"""
     print(us.out('0', 20000))  # The LT holder takes extra fees
     us.print_pool_state(bool_LT=True)
+
+    """Plot"""
+    fig, ax1 = plt.subplots()
+
+    ax1.plot([i for i in range(nRounds)], Gweis, 'b-')
+    ax1.set_xlabel('round')
+    ax1.set_ylabel('Gwei', color='b')
+    ax1.tick_params('y', colors='b')
+
+    ax2 = ax1.twinx()
+    ax2.plot([i for i in range(nRounds)], GASs, 'r-')
+    ax2.set_ylabel('GAS', color='r')
+    ax2.tick_params('y', colors='r')
+
+    for i in range(len(highs)):
+        plt.axvline(x=highs[i], color='black', linestyle='-', linewidth=2)
+
+    for i in range(len(lows)):
+        plt.axvline(x=lows[i], color='gray', linestyle=':', linewidth=2)
+
+    plt.show()

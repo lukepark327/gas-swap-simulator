@@ -101,6 +101,8 @@ if __name__ == "__main__":
     import random
     import matplotlib.pyplot as plt
 
+    random.seed(12345)
+
     # Arbitrager
     arbitrager = Arbitrager(1000000000, 200)
     balances = []
@@ -134,4 +136,6 @@ if __name__ == "__main__":
 
     """Plot"""
     plt.plot(balances)
+    plt.xlabel('round')
+    plt.ylabel('balance')
     plt.show()

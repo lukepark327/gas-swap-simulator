@@ -134,6 +134,8 @@ class Miner():
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
     current_block_number = 0
     current_block_gas_limit = 12000000
     # block_interval = 15000  # milliseconds  # ignore now
@@ -170,15 +172,44 @@ if __name__ == "__main__":
     miner.print_block_state()
 
     """test rewarding system"""
+    balances_Gwei = []
+    balances_GAS = []
+
     miner.print_balance_state()
+    balances_Gwei.append(miner.balance_Gwei)
+    balances_GAS.append(miner.balance_GAS)
 
     # case 1: pool
     from uniswap import Uniswap
     us = Uniswap('-1', 100000, 20000000, 1000000)  # 1:200
     print(miner.reward(pool=us))
+
     miner.print_balance_state()
+    balances_Gwei.append(miner.balance_Gwei)
+    balances_GAS.append(miner.balance_GAS)
 
     # case 2: oracle
     miner.reward_mode = "oracle"
-    print(miner.reward(oracle_ratio=200.))
+    print(miner.reward(oracle_ratio=400.))
+
     miner.print_balance_state()
+    balances_Gwei.append(miner.balance_Gwei)
+    balances_GAS.append(miner.balance_GAS)
+
+    """Plot"""
+    rounds = [0, 1, 2]
+
+    fig, ax1 = plt.subplots()
+
+    ax1.plot(rounds, balances_Gwei, 'b-')
+    ax1.set_xlabel('round')
+    ax1.set_ylabel('Gwei', color='b')
+    ax1.tick_params('y', colors='b')
+
+    ax2 = ax1.twinx()
+    ax2.plot(rounds, balances_GAS, 'r-')
+    ax2.set_ylabel('GAS', color='r')
+    ax2.tick_params('y', colors='r')
+
+    # fig.tight_layout()
+    plt.show()
