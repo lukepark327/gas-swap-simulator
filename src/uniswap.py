@@ -24,6 +24,9 @@ class Uniswap:  # between Eth and Gas
         self.Gwei, self.GAS = Gwei_prime, GAS_prime
         self.k = self.Gwei * self.GAS
 
+    def update_fee(self, new_fee):
+        self.fee = new_fee
+
     """Swap Protocol"""
 
     def _get_input_price(self, delta_X, X, Y, bool_fee=True):

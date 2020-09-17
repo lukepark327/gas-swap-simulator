@@ -82,6 +82,123 @@ def GAS2Gwei_Swap_Curve(args, pool, display=False):
         plt.savefig(get_PATH(args.path) + 'GAS2Gwei_Swap_Curve.png', format='png', dpi=300)
 
 
+def LP_k_GweiNGAS_Curve(args, pool, display=False):
+    ks, Gweis, GASs = [], [], []
+    ks.append(us.k)
+
+    """Txs"""
+    for _ in range(1000):  # 1000 Rounds
+        if random.random() < 0.5:
+            us.Gwei_to_GAS(105)
+        else:
+            us.GAS_to_Gwei_exact(105)
+
+        ks.append(us.k)
+        Gweis.append(us.Gwei)
+        GASs.append(us.GAS)
+
+    print(">>> after 1000 txs.")
+    us.print_pool_state(bool_LT=True)
+
+    """Providing Lquidity"""
+    input_Gwei = 200000
+    required_GAS = us.required_GAS_for_liquidity(input_Gwei)
+    print(">>> input (Gwei, GAS) = ({}, {})".format(input_Gwei, required_GAS))
+    get_LT = us.join('0', input_Gwei, required_GAS)
+    ks.append(us.k)
+
+    print(">>> after LP.")
+    us.print_pool_state(bool_LT=True)
+
+    """Txs"""
+    for _ in range(1000):  # 1000 Rounds
+        if random.random() < 0.5:
+            us.Gwei_to_GAS(105)
+        else:
+            us.GAS_to_Gwei_exact(105)
+
+        ks.append(us.k)
+        Gweis.append(us.Gwei)
+        GASs.append(us.GAS)
+
+    print(">>> after 1000 txs.")
+    us.print_pool_state(bool_LT=True)
+
+    """Remove Lquidity"""
+    withdraw_LT = get_LT
+    get_Gwei, get_GAS = us.out('0', withdraw_LT)
+    print(">>> output (Gwei, GAS) = ({}, {})".format(get_Gwei, get_GAS))
+    ks.append(us.k)
+
+    print(">>> after LP remove.")
+    us.print_pool_state(bool_LT=True)
+
+    """Txs"""
+    for _ in range(1000):  # 1000 Rounds
+        if random.random() < 0.5:
+            us.Gwei_to_GAS(105)
+        else:
+            us.GAS_to_Gwei_exact(105)
+
+        ks.append(us.k)
+        Gweis.append(us.Gwei)
+        GASs.append(us.GAS)
+
+    print(">>> after 1000 txs.")
+    us.print_pool_state(bool_LT=True)
+
+    """Plot"""
+    # k_Curve
+    fig, ax1 = plt.subplots()
+    ln1 = ax1.plot(ks, 'c-', label='k')
+    ax1.set_xlabel('transaction')
+    ax1.set_ylabel('k')  # , color='c')
+    # ax1.tick_params('y', colors='c')
+
+    plt.legend()
+
+    plt.axvline(x=1000, color='gray', linestyle=':', linewidth=2)
+    plt.axvline(x=2000, color='gray', linestyle=':', linewidth=2)
+
+    if display:
+        plt.show()
+    else:
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(8, 6)
+        plt.savefig(get_PATH(args.path) + 'LP_k_Curve.png', format='png', dpi=300)
+
+    # GweiNGAS_Curve
+    fig, ax1 = plt.subplots()
+
+    ln1 = ax1.plot(Gweis, 'b-', label='Gwei')
+    ax1.set_xlabel('transaction')
+    ax1.set_ylabel('Gwei', color='b')
+    ax1.tick_params('y', colors='b')
+
+    ax2 = ax1.twinx()
+    ln2 = ax2.plot(GASs, 'r-', label='GAS')
+    ax2.set_ylabel('GAS', color='r')
+    ax2.tick_params('y', colors='r')
+
+    lns = ln1 + ln2
+    labs = [ln.get_label() for ln in lns]
+    ax1.legend(lns, labs)
+
+    plt.axvline(x=1000, color='gray', linestyle=':', linewidth=2)
+    plt.axvline(x=2000, color='gray', linestyle=':', linewidth=2)
+
+    if display:
+        plt.show()
+    else:
+        figure = plt.gcf()  # get current figure
+        figure.set_size_inches(8, 6)
+        plt.savefig(get_PATH(args.path) + 'LP_GweiNGAS_Curve.png', format='png', dpi=300)
+
+
+def fee_Gain_Curve():
+    pass
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=950327)
@@ -98,11 +215,18 @@ if __name__ == "__main__":
                  amount_GAS=200000000,  # Gwei:GAS = 1:200
                  init_LT=1000000,
                  fee=0.003)
+
     print(">>> init pool.")
     us.print_pool_state(bool_LT=True)
 
     """Simulation 1-1) Gwei -> GAS Swap curve"""
-    Gwei2GAS_Swap_Curve(args, us, display=args.no_save)
+    # Gwei2GAS_Swap_Curve(args, us, display=args.no_save)
 
     """Simulation 1-2) GAS -> Gwei Swap curve"""
-    GAS2Gwei_Swap_Curve(args, us, display=args.no_save)
+    # GAS2Gwei_Swap_Curve(args, us, display=args.no_save)
+
+    """Simulation 2-1) Providing Liquidity & k"""
+    # LP_k_GweiNGAS_Curve(args, us, display=args.no_save)
+
+    """Simulation 2-2) Fee & LP's Gain"""
+    fee_Gain_Curve(args, us, display=args.no_save)
