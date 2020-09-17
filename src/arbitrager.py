@@ -68,6 +68,8 @@ class Arbitrager:
             self.update_balance_GAS(gain)
             pool.GAS_to_Gwei(N_GAS, bool_update=True)
 
+        return gain
+
     def _buy_GAS(self, pool):
         # Calculating the best N_Gwei which maximize `gain`
         N_Gwei = self._best_number(pool.Gwei, pool.GAS, pool.fee, self.oracle_ratio)
@@ -82,17 +84,19 @@ class Arbitrager:
             self.update_balance_GAS(gain)
             pool.Gwei_to_GAS(N_Gwei, bool_update=True)
 
+        return gain
+
     def arbitrage(self, pool):
         current_Gwei, current_GAS = pool.Gwei, pool.GAS
         pool_ratio = float(current_GAS / current_Gwei)
 
         if pool_ratio > self.oracle_ratio:
             # self._sell_Gwei(pool)
-            self._buy_GAS(pool)
+            return self._buy_GAS(pool)
 
         elif pool_ratio < self.oracle_ratio:
             # self._sell_GAS(pool)
-            self._buy_Gwei(pool)
+            return self._buy_Gwei(pool)
 
 
 if __name__ == "__main__":
@@ -104,7 +108,7 @@ if __name__ == "__main__":
     random.seed(12345)
 
     # Arbitrager
-    arbitrager = Arbitrager(1000000000, 200)
+    arbitrager = Arbitrager(1000000000, 200.)
     balances = []
 
     """init"""
