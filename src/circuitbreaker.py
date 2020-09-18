@@ -34,6 +34,12 @@ class Uniswap_with_CB(Uniswap):
         """Logging"""
         self.low, self.high, self.normal = 0, 0, 0
 
+    def update_mode(self, new_mode):
+        self.CB_mode = new_mode
+
+    def update_threshold(self, new_threshold):
+        self.threshold = new_threshold
+
     """Circuit Breaker"""
 
     # def set_threshold(self, threshold):

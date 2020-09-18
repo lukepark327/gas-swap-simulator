@@ -14,7 +14,7 @@ def get_PATH(path):
     return PATH
 
 
-def Arbitraging_Curve(args, actor, pool, display=False):
+def Arbitraging_Curve(args, pool, actor, display=False):
     tmp_pool = deepcopy(pool)
 
     ks, Gweis, GASs, balances, Timings = [], [], [], [], []
@@ -118,19 +118,16 @@ if __name__ == "__main__":
     random.seed(args.seed)
 
     """init"""
-    arbitrager = Arbitrager(1000000000, 200.)  # [GAS]
     us = Uniswap(address='-1',
                  amount_Gwei=1000000,
                  amount_GAS=200000000,  # Gwei:GAS = 1:200
                  init_LT=1000000,
                  fee=0.003)
-
-    print(">>> init pool.")
-    us.print_pool_state(bool_LT=True)
+    arbitrager = Arbitrager(1000000000, 200.)  # [GAS]
 
     """Simulation)
     # Gwei <-> GAS & Arbitraging Timing
     # k & Arbitraging Timing
     # Arbitrager's Gain
     """
-    Arbitraging_Curve(args, arbitrager, us, display=args.no_save)
+    Arbitraging_Curve(args, us, arbitrager, display=args.no_save)
